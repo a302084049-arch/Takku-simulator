@@ -1,0 +1,192 @@
+04.02 6:53 PM
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#080808">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SIMULATE</title>
+
+<link rel="manifest" href="data:application/manifest+json,{'name':'SIMULATE','short_name':'SIMULATE','start_url':'.','display':'standalone','background_color':'#080808','theme_color':'#e8ff00'}">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#080808;--surface:#111;--card:#141414;--border:#1e1e1e;
+  --accent:#e8ff00;--accent2:#00ffb3;--accent3:#ff4d4d;
+  --text:#f0f0f0;--muted:#555;--dim:#2a2a2a;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden}
+.screen{display:none;flex-direction:column;min-height:100vh}
+.screen.active{display:flex;animation:fadeIn 0.3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.scroll-content{flex:1;overflow-y:auto;padding-bottom:100px;-webkit-overflow-scrolling:touch}
+::-webkit-scrollbar{display:none}
+
+/* SPLASH */
+#splash{background:#080808;align-items:center;justify-content:center;gap:12px;text-align:center;padding:40px 24px;z-index: 1000; position: fixed; width: 100%; height: 100%;}
+.splash-logo{font-size:5rem;font-weight:900;letter-spacing:-3px;color:var(--accent);line-height:0.9;text-shadow:0 0 80px rgba(232,255,0,0.25)}
+.splash-sub{font-size:0.65rem;letter-spacing:6px;color:var(--muted);text-transform:uppercase;margin-top:8px}
+.splash-tagline{font-size:1rem;color:#777;max-width:240px;line-height:1.6;margin-top:6px}
+.splash-bar{width:180px;height:2px;background:var(--dim);border-radius:2px;margin-top:48px;overflow:hidden}
+.splash-fill{height:100%;background:var(--accent);border-radius:2px;width:0;transition:width 1.5s ease}
+
+/* NAV */
+.nav{display:flex;background:rgba(8,8,8,0.96);backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:10px 0 25px;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:100}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;color:var(--muted);font-size:0.55rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;padding:6px 0;transition:color 0.2s}
+.nb.on{color:var(--accent)}
+.nb svg{width:20px;height:20px}
+
+/* HOME UI */
+.hdr{padding:52px 20px 16px;background:linear-gradient(180deg,#0e0e0e,var(--bg))}
+.hdr-greeting{font-size:0.6rem;letter-spacing:4px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.hdr-title{font-size:2rem;font-weight:800;line-height:1.1;letter-spacing:-0.5px}
+.hdr-title span{color:var(--accent)}
+
+.id-pulse{margin:14px 20px;background:linear-gradient(135deg,#0f0f00,#111);border:1px solid rgba(232,255,0,0.18);border-radius:14px;padding:16px;position:relative;overflow:hidden}
+.ip-label{font-size:0.58rem;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:8px}
+.ip-quote{font-size:0.9rem;color:#ccc;line-height:1.55;font-style:italic;position:relative;z-index:1}
+
+.streak-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 20px}
+.sbox{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center}
+.sbox-val{font-size:1.7rem;font-weight:800;color:var(--accent)}
+.sbox-lbl{font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+
+.daily-stack{padding:0 20px;display:flex;flex-direction:column;gap:8px}
+.si{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.2s;position:relative}
+.si:active{transform:scale(0.97)}
+.si.done{border-color:var(--accent2);background:rgba(0,255,179,0.03)}
+.si.done::after{content:'✓';position:absolute;right:16px;color:var(--accent2);font-weight:700}
+.si-info{flex:1}
+.si-name{font-size:0.85rem;font-weight:600}
+.si-meta{font-size:0.62rem;color:var(--muted)}
+
+.spacer{height:30px}
+</style>
+</head>
+<body>
+
+<div id="splash" class="screen active">
+  <div class="splash-logo">SIM<br>UL<br>ATE</div>
+  <p class="splash-sub">Identity Protocol</p>
+  <div class="splash-bar"><div class="splash-fill" id="splashFill"></div></div>
+</div>
+
+<div id="home" class="screen">
+  <div class="scroll-content">
+    <div class="hdr">
+      <p class="hdr-greeting" id="currentDate">April 2026</p>
+      <h1 class="hdr-title">Who are you<br><span>becoming?</span></h1>
+    </div>
+
+    <div class="id-pulse">
+      <div class="ip-label">Identity Signal</div>
+      <div class="ip-quote">"I do not negotiate with laziness. I execute."</div>
+    </div>
+
+    <div class="streak-row">
+      <div class="sbox"><div class="sbox-val" id="streakVal">12</div><div class="sbox-lbl">Streak</div></div>
+      <div class="sbox"><div class="sbox-val" id="doneVal">0</div><div class="sbox-lbl">Completed</div></div>
+      <div class="sbox"><div class="sbox-val">94%</div><div class="sbox-lbl">Power</div></div>
+    </div>
+
+    <div style="padding: 20px 20px 10px; font-size: 0.6rem; letter-spacing: 2px; color: var(--muted); text-transform: uppercase;">Today's Stack</div>
+    
+    <div class="daily-stack" id="taskStack">
+      <div class="si" onclick="toggleTask(this, 'med')">
+        <div style="font-size: 1.5rem">🧘</div>
+        <div class="si-info"><div class="si-name">Meditation</div><div class="si-meta">Clarity · 5:30 AM</div></div>
+      </div>
+      <div class="si" onclick="toggleTask(this, 'study')">
+        <div style="font-size: 1.5rem"></div>
+        <div class="si-info"><div class="si-name">Deep Study</div><div class="si-meta">Focus · 10:00 AM</div></div>
+      </div>
+      <div class="si" onclick="toggleTask(this, 'bike')">
+        <div style="font-size: 1.5rem">️</div>
+        <div class="si-info"><div class="si-name">Bike Ride</div><div class="si-meta">Movement · 5:00 PM</div></div>
+      </div>
+      <div class="si" onclick="toggleTask(this, 'plan')">
+        <div style="font-size: 1.5rem"></div>
+        <div class="si-info"><div class="si-name">Planning</div><div class="si-meta">Attack · 9:00 PM</div></div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <nav class="nav">
+    <button class="nb on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>HOME</button>
+    <button class="nb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>SIMS</button>
+    <button class="nb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>ID</button>
+  </nav>
+</div>
+
+<script>
+// 1. Splash Screen Logic
+window.addEventListener('load', () => {
+    const fill = document.getElementById('splashFill');
+    setTimeout(() => { fill.style.width = '100%'; }, 100);
+    
+    setTimeout(() => {
+        document.getElementById('splash').classList.remove('active');
+        document.getElementById('home').classList.add('active');
+        initApp();
+    }, 1800);
+});
+
+// 2. Data Persistence Logic
+let appData = JSON.parse(localStorage.getItem('simulate_data')) || {
+    streak: 12,
+    tasks: {}
+};
+
+function initApp() {
+    // Set current date
+    const d = new Date();
+    document.getElementById('currentDate').innerText = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    
+    // Load saved streak
+    document.getElementById('streakVal').innerText = appData.streak;
+    
+    // Load saved task states
+    const taskItems = document.querySelectorAll('.si');
+    let completedCount = 0;
+    
+    taskItems.forEach((item, index) => {
+        const taskId = `task_${index}`;
+        if(appData.tasks[taskId]) {
+            item.classList.add('done');
+            completedCount++;
+        }
+    });
+    document.getElementById('doneVal').innerText = completedCount;
+}
+
+function toggleTask(element, id) {
+    element.classList.toggle('done');
+    
+    // Haptic feedback (if available)
+    if (window.navigator.vibrate) window.navigator.vibrate(10);
+    
+    const taskItems = document.querySelectorAll('.si');
+    let completedCount = 0;
+    
+    taskItems.forEach((item, index) => {
+        const taskId = `task_${index}`;
+        if(item.classList.contains('done')) {
+            appData.tasks[taskId] = true;
+            completedCount++;
+        } else {
+            delete appData.tasks[taskId];
+        }
+    });
+    
+    document.getElementById('doneVal').innerText = completedCount;
+    localStorage.setItem('simulate_data', JSON.stringify(appData));
+}
+</script>
+
+</body>
+</html>
+
